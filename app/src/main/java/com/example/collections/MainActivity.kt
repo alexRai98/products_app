@@ -7,10 +7,14 @@ import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.collections.adapters.ProductAdapter
 import com.example.collections.databinding.ActivityMainBinding
 import com.example.collections.domain.Product
+import com.example.collections.network.service
+import com.example.collections.viewModels.MainViewModel
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity() {
@@ -20,39 +24,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.productsRecycler.layoutManager = LinearLayoutManager(this)
-
-        val productList : MutableList<Product> = mutableListOf<Product>()
-        productList.add(Product("1","Pañal XG", BigDecimal(45.6), BigDecimal(1.2), "paquete"))
-        productList.add(Product("2","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("3","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("4","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("5","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("1","Pañal XG", BigDecimal(45.6), BigDecimal(1.2), "paquete"))
-        productList.add(Product("2","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("3","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("4","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("5","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("1","Pañal XG", BigDecimal(45.6), BigDecimal(1.2), "paquete"))
-        productList.add(Product("2","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("3","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("4","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("5","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("1","Pañal XG", BigDecimal(45.6), BigDecimal(1.2), "paquete"))
-        productList.add(Product("2","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("3","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("4","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-        productList.add(Product("5","Pañal XG", BigDecimal(45.6),BigDecimal(1.2), "paquete"))
-
+        val viewModel : MainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         val adapter = ProductAdapter()
         binding.productsRecycler.adapter = adapter
-        adapter.submitList(productList)
+        viewModel.productList.observe(this, Observer {
+            adapter.submitList(it)
 
-        adapter.onItemClickListener = {
-            Log.d("PRODUCT-DATA", it.name)
-        }
-        if(productList.isEmpty()){
+            handleEmptyView(it, binding)
+        })
+
+        service.getAllProducts()
+    }
+
+    private fun handleEmptyView(
+        it: MutableList<Product>,
+        binding: ActivityMainBinding
+    ) {
+        if (it.isEmpty()) {
             binding.labelNoItems.visibility = View.VISIBLE
-        }else{
+        } else {
             binding.labelNoItems.visibility = View.GONE
         }
     }
